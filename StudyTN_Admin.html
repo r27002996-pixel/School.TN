@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html lang="fr" dir="ltr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#111827">
+<title>StudyTN — Révision intelligente</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+ --bg:#07111f;--card:#101d30;--card2:#15243a;--text:#f4f7fb;--muted:#9eb0c8;
+ --primary:#5eead4;--primary2:#38bdf8;--danger:#fb7185;--gold:#fbbf24;
+ --border:rgba(255,255,255,.09);--shadow:0 18px 50px rgba(0,0,0,.25)
+}
+body{font-family:Arial,sans-serif;background:radial-gradient(circle at 20% 0,#12314b 0,transparent 35%),var(--bg);color:var(--text);min-height:100vh}
+button,input{font:inherit}
+button{border:0;cursor:pointer}
+.app{max-width:1200px;margin:auto;padding:18px}
+header{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 0 25px}
+.logo{font-size:25px;font-weight:900}.logo span{color:var(--primary)}
+.header-actions{display:flex;gap:8px}
+.icon-btn{background:var(--card);border:1px solid var(--border);color:white;border-radius:12px;padding:10px 13px}
+.hero{background:linear-gradient(135deg,rgba(56,189,248,.18),rgba(94,234,212,.09));border:1px solid var(--border);border-radius:25px;padding:28px;box-shadow:var(--shadow);overflow:hidden;position:relative}
+.hero:after{content:"";position:absolute;width:220px;height:220px;border-radius:50%;background:rgba(94,234,212,.08);right:-80px;top:-90px}
+.hero h1{font-size:clamp(28px,6vw,52px);line-height:1.05;margin-bottom:12px}
+.hero p{color:var(--muted);max-width:650px;line-height:1.6}
+.btn{padding:12px 18px;border-radius:12px;font-weight:800;transition:.2s}
+.btn:hover{transform:translateY(-2px)}
+.primary{background:linear-gradient(90deg,var(--primary2),var(--primary));color:#06121c}
+.secondary{background:var(--card2);color:white;border:1px solid var(--border)}
+.stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin:16px 0}
+.stat,.card{background:rgba(16,29,48,.88);border:1px solid var(--border);border-radius:18px;padding:18px}
+.stat b{font-size:27px;display:block;margin-bottom:5px}.stat span{color:var(--muted);font-size:13px}
+.section-title{display:flex;align-items:center;justify-content:space-between;margin:25px 0 12px}
+.section-title h2{font-size:22px}
+.tabs{display:flex;gap:8px;overflow:auto;padding-bottom:5px}
+.tab{white-space:nowrap;background:var(--card);color:var(--muted);border:1px solid var(--border);padding:10px 15px;border-radius:999px}
+.tab.active{background:var(--primary);color:#05201e}
+.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.subject{position:relative;overflow:hidden;min-height:170px}
+.subject .emoji{font-size:38px}.subject h3{margin:12px 0 7px}.subject p{color:var(--muted);font-size:13px;line-height:1.5}
+.subject .open{position:absolute;right:14px;bottom:14px}
+.progress{height:8px;background:#26364c;border-radius:99px;overflow:hidden;margin-top:12px}
+.progress i{display:block;height:100%;background:linear-gradient(90deg,var(--primary2),var(--primary));border-radius:99px}
+.lesson-list{display:grid;gap:12px}
+.lesson{display:flex;align-items:center;justify-content:space-between;gap:15px}
+.lesson small{color:var(--muted)}.lesson h3{margin-bottom:5px}
+.badge{display:inline-block;padding:5px 8px;border-radius:8px;background:rgba(94,234,212,.1);color:var(--primary);font-size:11px;font-weight:bold}
+.modal{position:fixed;inset:0;background:rgba(0,0,0,.72);display:none;align-items:center;justify-content:center;padding:16px;z-index:50}
+.modal.show{display:flex}
+.modal-box{width:min(760px,100%);max-height:90vh;overflow:auto;background:#0c1828;border:1px solid var(--border);border-radius:22px;padding:22px;box-shadow:var(--shadow)}
+.close{float:right;background:#1c2b40;color:white;border-radius:10px;padding:8px 11px}
+.modal h2{margin-bottom:12px}.content{color:#c9d5e5;line-height:1.8}.content ul{margin:12px 0 12px 22px}
+.quiz-option{display:block;width:100%;text-align:left;background:var(--card);border:1px solid var(--border);color:white;padding:13px;border-radius:12px;margin:9px 0}
+.quiz-option.correct{border-color:#34d399;background:rgba(52,211,153,.15)}
+.quiz-option.wrong{border-color:var(--danger);background:rgba(251,113,133,.12)}
+.search{width:100%;background:var(--card);border:1px solid var(--border);color:white;padding:13px 15px;border-radius:12px;outline:none}
+.empty{text-align:center;color:var(--muted);padding:30px}
+.toast{position:fixed;left:50%;bottom:22px;transform:translateX(-50%) translateY(100px);background:#17263a;color:white;border:1px solid var(--border);padding:12px 17px;border-radius:12px;transition:.3s;z-index:100}
+.toast.show{transform:translateX(-50%) translateY(0)}
+footer{text-align:center;color:#71839b;padding:35px 0 20px;font-size:12px}
+.design2{--bg:#f4f7fb;--card:#ffffff;--card2:#edf2f7;--text:#102033;--muted:#607086;--border:rgba(15,23,42,.10);--shadow:0 15px 40px rgba(15,23,42,.10)}
+.design2 body,.design2{color:var(--text)}
+.design3{--bg:#08050f;--card:#171024;--card2:#211632;--text:#faf5ff;--muted:#b9a9c9;--primary:#f0abfc;--primary2:#a78bfa;--border:rgba(240,171,252,.14);--shadow:0 18px 55px rgba(124,58,237,.22)}
+.design3 .hero{background:linear-gradient(135deg,rgba(167,139,250,.22),rgba(240,171,252,.08))}
+@media(max-width:800px){.grid{grid-template-columns:repeat(2,1fr)}.stats{grid-template-columns:repeat(2,1fr)}}
+@media(max-width:520px){.app{padding:12px}.grid{grid-template-columns:1fr}.hero{padding:22px}.hero h1{font-size:34px}.lesson{align-items:flex-start;flex-direction:column}.lesson .btn{width:100%}}
+</style>
+</head>
+<body>
+<div class="app">
+<header>
+  <div class="logo">Study<span>TN</span> 📚</div>
+  <div class="header-actions">
+    <button class="icon-btn" onclick="cycleLanguage()" id="langBtn">EN</button>
+    <button class="icon-btn" onclick="cycleDesign()" id="designBtn">D1</button>
+    <button class="icon-btn" onclick="openAdminLogin()">🔐 Admin</button>
+<button class="icon-btn" onclick="showProfile()">👤</button>
+  </div>
+</header>
+
+<section class="hero">
+  <h1>Révise mieux.<br><span style="color:var(--primary)">Progresse chaque jour.</span></h1>
+  <p>Une plateforme de révision pour les élèves : cours simples, quiz, suivi de progression et révision intelligente.</p>
+  <div style="display:flex;gap:9px;flex-wrap:wrap;margin-top:18px">
+    <button class="btn primary" onclick="startToday()">Commencer ma révision</button>
+    <button class="btn secondary" onclick="openLessons('all')">Voir les cours</button>
+  </div>
+</section>
+
+<div class="stats">
+  <div class="stat"><b id="points">0</b><span>Points</span></div>
+  <div class="stat"><b id="streak">0 🔥</b><span>Jours consécutifs</span></div>
+  <div class="stat"><b id="done">0</b><span>Quiz terminés</span></div>
+  <div class="stat"><b id="average">0%</b><span>Moyenne</span></div>
+</div>
+
+<div class="section-title"><h2>Matières</h2></div>
+<div id="subjectGrid" class="grid"></div>
+
+<div class="section-title">
+  <h2>Révision du jour</h2>
+  <button class="btn secondary" style="padding:8px 11px" onclick="openLessons('all')">Tout voir</button>
+</div>
+<div id="todayList" class="lesson-list"></div>
+
+<div class="section-title"><h2>Rechercher un cours</h2></div>
+<input id="search" class="search" placeholder="Rechercher : fractions, respiration, grammaire..." oninput="searchLessons()">
+<div id="searchResults" class="lesson-list" style="margin-top:12px"></div>
+
+<footer>StudyTN • Prototype éducatif — les données sont enregistrées localement sur cet appareil.</footer>
+</div>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()">
+ <div class="modal-box" id="modalBox"></div>
+</div>
+<div id="adminModal" class="modal" onclick="if(event.target===this)closeAdmin()">
+<div class="modal-box" id="adminBox"></div></div>
+<div id="toast" class="toast"></div>
+
+<script>
+const defaultSubjects=[
+{name:"Mathématiques",emoji:"📐"},{name:"Sciences",emoji:"🧬"},
+{name:"Français",emoji:"🇫🇷"},{name:"English",emoji:"🇬🇧"},
+{name:"Physique",emoji:"⚡"},{name:"العربية",emoji:"📝"}];
+let lessons=JSON.parse(localStorage.getItem("studytn_lessons")||"[]");
+
+let state=JSON.parse(localStorage.getItem("studytn_state")||'{"points":0,"done":0,"scores":[],"completed":[],"lastDate":"","streak":0,"theme":"dark"}');
+let currentLesson=null,currentQuestion=0,currentScore=0;
+
+function save(){localStorage.setItem("studytn_state",JSON.stringify(state));updateStats()}
+function updateStats(){
+ document.getElementById("points").textContent=state.points;
+ document.getElementById("done").textContent=state.done;
+ let avg=state.scores.length?Math.round(state.scores.reduce((a,b)=>a+b,0)/state.scores.length):0;
+ document.getElementById("average").textContent=avg+"%";
+ document.getElementById("streak").textContent=state.streak+" 🔥";
+}
+function renderSubjects(){
+ const grid=document.getElementById("subjectGrid");
+ grid.innerHTML=defaultSubjects.map(s=>{
+  const arr=lessons.filter(x=>x.subject===s.name), done=arr.filter(x=>state.completed.includes(x.id)).length;
+  return `<div class="card subject"><div class="emoji">${s.emoji}</div><h3>${s.name}</h3>
+  <p>${arr.length} cours • ${done}/${arr.length} terminés</p>
+  <div class="progress"><i style="width:${arr.length?done/arr.length*100:0}%"></i></div>
+  <button class="btn secondary open" onclick="openLessons('${escapeAttr(s.name)}')">${uiText[appLang].explore}</button></div>`;
+ }).join("");
+}
+function renderToday(){
+ const arr=lessons.filter(x=>!state.completed.includes(x.id)).slice(0,3);
+ document.getElementById("todayList").innerHTML=arr.length?arr.map(lessonCard).join(""):`<div class="card empty">Aucun cours n’a encore été ajouté.<br><small>Ouvre Admin pour créer le premier cours.</small></div>`;
+}
+function lessonCard(l){
+ return `<div class="card lesson"><div><span class="badge">${l.subject}</span><h3>${l.emoji} ${l.title}</h3><small>${l.level} • ${l.questions.length} questions</small></div><button class="btn primary" onclick="openLesson(${l.id})">${uiText[appLang].study}</button></div>`;
+}
+function openLessons(subject){
+ let arr=subject==="all"?lessons:lessons.filter(x=>x.subject===subject);
+ document.getElementById("modalBox").innerHTML=`<button class="close" onclick="closeModal()">✕</button><h2>📚 ${subject==="all"?"Tous les cours":subject}</h2><div class="lesson-list">${arr.map(lessonCard).join("")}</div>`;
+ showModal();
+}
+function openLesson(id){
+ currentLesson=lessons.find(x=>x.id===id);
+ document.getElementById("modalBox").innerHTML=`
+ <button class="close" onclick="closeModal()">✕</button>
+ <span class="badge">${currentLesson.subject}</span>
+ <h2>${currentLesson.emoji} ${currentLesson.title}</h2>
+ <div class="content">${formatContent(currentLesson.content)}</div>
+ <div style="display:flex;gap:10px;margin-top:20px;flex-wrap:wrap">
+ <button class="btn primary" onclick="startQuiz()">🧠 Faire le Quiz</button>
+ <button class="btn secondary" onclick="markComplete()">✓ Marquer comme révisé</button>
+ </div>`;
+ showModal();
+}
+function formatContent(t){return "<p>"+t+"</p>"}
+function startQuiz(){
+ currentQuestion=0;currentScore=0;renderQuestion();
+}
+function renderQuestion(){
+ let q=currentLesson.questions[currentQuestion];
+ document.getElementById("modalBox").innerHTML=`
+ <button class="close" onclick="closeModal()">✕</button>
+ <span class="badge">Question ${currentQuestion+1}/${currentLesson.questions.length}</span>
+ <h2 style="margin-top:12px">${q.q}</h2>
+ <div>${q.a.map((a,i)=>`<button class="quiz-option" onclick="answer(${i})">${a}</button>`).join("")}</div>
+ <div class="progress"><i style="width:${currentQuestion/currentLesson.questions.length*100}%"></i></div>`;
+}
+function answer(i){
+ let q=currentLesson.questions[currentQuestion];
+ document.querySelectorAll(".quiz-option").forEach((b,n)=>{b.disabled=true;if(n===q.c)b.classList.add("correct");if(n===i&&i!==q.c)b.classList.add("wrong")});
+ if(i===q.c)currentScore++;
+ setTimeout(()=>{
+  currentQuestion++;
+  if(currentQuestion<currentLesson.questions.length)renderQuestion();else finishQuiz();
+ },650);
+}
+function finishQuiz(){
+ let percent=Math.round(currentScore/currentLesson.questions.length*100);
+ let earned=Math.max(5,Math.round(currentLesson.points*percent/100));
+ state.points+=earned;state.done++;state.scores.push(percent);
+ if(!state.completed.includes(currentLesson.id)&&percent>=50)state.completed.push(currentLesson.id);
+ updateStreak();save();renderSubjects();renderToday();
+ document.getElementById("modalBox").innerHTML=`
+ <button class="close" onclick="closeModal()">✕</button>
+ <div style="text-align:center;padding:20px 0">
+ <div style="font-size:60px">${percent>=80?"🏆":percent>=50?"👏":"💪"}</div>
+ <h2>Quiz terminé !</h2>
+ <p style="color:var(--muted);margin:10px 0">Score : <strong style="color:var(--primary)">${percent}%</strong></p>
+ <p>+${earned} points</p>
+ <div style="margin-top:18px"><button class="btn primary" onclick="closeModal()">Continuer</button></div>
+ </div>`;
+}
+function markComplete(){
+ if(!state.completed.includes(currentLesson.id))state.completed.push(currentLesson.id);
+ state.points+=5;save();renderSubjects();renderToday();toast("Cours marqué comme révisé ✓");closeModal();
+}
+function updateStreak(){
+ let today=new Date().toISOString().slice(0,10);
+ if(state.lastDate!==today){
+  let yesterday=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  state.streak=state.lastDate===yesterday?state.streak+1:1;
+  state.lastDate=today;
+ }
+}
+function startToday(){
+ let l=lessons.find(x=>!state.completed.includes(x.id))||lessons[0];openLesson(l.id);
+}
+function searchLessons(){
+ let q=document.getElementById("search").value.toLowerCase().trim();
+ let box=document.getElementById("searchResults");
+ if(!q){box.innerHTML="";return}
+ let arr=lessons.filter(l=>(l.title+" "+l.subject+" "+l.content).toLowerCase().includes(q));
+ box.innerHTML=arr.length?arr.map(lessonCard).join(""):`<div class="empty">Aucun cours trouvé.</div>`;
+}
+function showProfile(){
+ let avg=state.scores.length?Math.round(state.scores.reduce((a,b)=>a+b,0)/state.scores.length):0;
+ document.getElementById("modalBox").innerHTML=`<button class="close" onclick="closeModal()">✕</button><h2>👤 Mon profil</h2><div class="card" style="margin-top:12px"><h3>StudyTN</h3><p style="color:var(--muted);margin-top:8px">Progression : ${state.completed.length}/${lessons.length} cours</p><p style="color:var(--muted);margin-top:8px">Moyenne des quiz : ${avg}%</p><p style="color:var(--muted);margin-top:8px">Points : ${state.points}</p></div><button class="btn secondary" style="margin-top:14px" onclick="resetProgress()">${uiText[appLang].reset}</button>`;
+ showModal();
+}
+function resetProgress(){
+ if(confirm("Réinitialiser toute la progression ?")){localStorage.removeItem("studytn_state");location.reload()}
+}
+function toggleTheme(){document.body.classList.toggle("light");toast("Thème modifié")}
+function showModal(){document.getElementById("modal").classList.add("show")}
+function closeModal(){document.getElementById("modal").classList.remove("show")}
+function toast(t){let x=document.getElementById("toast");x.textContent=t;x.classList.add("show");setTimeout(()=>x.classList.remove("show"),1800)}
+function escapeAttr(s){return s.replace(/'/g,"&#39;")}
+
+const uiText={
+en:{title:"Revise smarter.",sub:"Study better. Progress every day.",desc:"A revision platform for students: clear lessons, quizzes, progress tracking and smart review.",start:"Start today's revision",all:"View lessons",subjects:"Subjects",today:"Today's revision",search:"Search for a lesson",points:"Points",streak:"Streak",done:"Quizzes completed",average:"Average",study:"Study",explore:"Explore",reset:"Reset my data"},
+ar:{title:"راجع بذكاء.",sub:"ادرس أفضل. وتقدّم كل يوم.",desc:"منصة مراجعة للتلاميذ: دروس واضحة، اختبارات، متابعة للتقدم ومراجعة ذكية.",start:"ابدأ مراجعة اليوم",all:"شاهد الدروس",subjects:"المواد",today:"مراجعة اليوم",search:"ابحث عن درس",points:"النقاط",streak:"أيام متتالية",done:"اختبارات مكتملة",average:"المعدل",study:"ادرس",explore:"استكشف",reset:"إعادة بياناتي"},
+fr:{title:"Révise intelligemment.",sub:"Étudie mieux. Progresse chaque jour.",desc:"Une plateforme de révision : cours clairs, quiz, suivi des progrès et révision intelligente.",start:"Commencer la révision",all:"Voir les cours",subjects:"Matières",today:"Révision du jour",search:"Rechercher un cours",points:"Points",streak:"Jours consécutifs",done:"Quiz terminés",average:"Moyenne",study:"Étudier",explore:"Explorer",reset:"Réinitialiser mes données"}
+};
+let appLang=localStorage.getItem("studytn_lang")||"en";
+let design=Number(localStorage.getItem("studytn_design")||"1");
+
+const ADMIN_CODE="2468";
+let editingLessonId=null;
+function openAdminLogin(){
+ document.getElementById("adminBox").innerHTML=`<button class="close" onclick="closeAdmin()">✕</button>
+ <h2>🔐 Admin Panel</h2><p style="color:var(--muted);margin:8px 0 15px">Enter the secret code.</p>
+ <input id="adminCodeInput" class="search" type="password" inputmode="numeric" placeholder="Secret code">
+ <button class="btn primary" style="margin-top:12px;width:100%" onclick="checkAdminCode()">Open Dashboard</button>
+ <p id="adminError" style="color:var(--danger);margin-top:9px"></p>`;
+ document.getElementById("adminModal").classList.add("show");
+}
+function checkAdminCode(){
+ if(document.getElementById("adminCodeInput").value===ADMIN_CODE)renderAdminDashboard();
+ else document.getElementById("adminError").textContent="Incorrect code.";
+}
+function closeAdmin(){document.getElementById("adminModal").classList.remove("show")}
+function saveLessons(){localStorage.setItem("studytn_lessons",JSON.stringify(lessons));renderSubjects();renderToday();searchLessons()}
+function renderAdminDashboard(){
+ document.getElementById("adminBox").innerHTML=`<button class="close" onclick="closeAdmin()">✕</button>
+ <h2>⚙️ Admin Dashboard</h2><p style="color:var(--muted);margin:8px 0 15px">${lessons.length} lessons stored.</p>
+ <div style="display:grid;gap:10px">
+ <button class="btn primary" onclick="showLessonEditor()">＋ Add lesson</button>
+ <button class="btn secondary" onclick="showAdminLessons()">📚 Manage lessons</button>
+ <button class="btn secondary" onclick="exportContent()">⬇ Export JSON</button>
+ <button class="btn secondary" onclick="document.getElementById('importFile').click()">⬆ Import JSON</button>
+ <input id="importFile" type="file" accept=".json,application/json" style="display:none" onchange="importContent(event)">
+ </div>`;
+}
+function showAdminLessons(){
+ const rows=lessons.length?lessons.map(l=>`<div class="card lesson">
+ <div><span class="badge">${l.subject}</span><h3>${l.emoji||"📚"} ${l.title}</h3><small>${l.questions.length} questions</small></div>
+ <div style="display:flex;gap:7px"><button class="btn secondary" onclick="showLessonEditor(${l.id})">Edit</button>
+ <button class="btn secondary" onclick="deleteLesson(${l.id})">Delete</button></div></div>`).join(""):`<div class="empty">No lessons yet.</div>`;
+ document.getElementById("adminBox").innerHTML=`<button class="close" onclick="renderAdminDashboard()">←</button>
+ <h2>📚 Manage lessons</h2><div class="lesson-list" style="margin-top:14px">${rows}</div>`;
+}
+function escAdmin(v){return String(v||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;")}
+function questionEditor(q){
+ q=q||{q:"",a:["","",""],c:0};
+ return `<div class="card qeditor" style="margin-bottom:10px">
+ <div style="display:flex;justify-content:space-between"><b>Question</b><button class="icon-btn" onclick="this.closest('.qeditor').remove()">🗑</button></div>
+ <input class="search aq" style="margin-top:9px" placeholder="Question" value="${escAdmin(q.q)}">
+ <input class="search aa" placeholder="Answer A" value="${escAdmin(q.a[0])}">
+ <input class="search aa" placeholder="Answer B" value="${escAdmin(q.a[1])}">
+ <input class="search aa" placeholder="Answer C" value="${escAdmin(q.a[2])}">
+ <select class="search ac"><option value="0" ${q.c==0?"selected":""}>Correct: A</option>
+ <option value="1" ${q.c==1?"selected":""}>Correct: B</option><option value="2" ${q.c==2?"selected":""}>Correct: C</option></select></div>`;
+}
+function showLessonEditor(id=null){
+ editingLessonId=id;const l=id?lessons.find(x=>x.id===id):null;
+ const opts=defaultSubjects.map(s=>`<option ${l?.subject===s.name?"selected":""}>${s.name}</option>`).join("");
+ document.getElementById("adminBox").innerHTML=`<button class="close" onclick="renderAdminDashboard()">←</button>
+ <h2>${l?"✏️ Edit lesson":"➕ Add lesson"}</h2><div style="display:grid;gap:10px;margin-top:14px">
+ <select id="aSubject" class="search">${opts}</select>
+ <input id="aTitle" class="search" placeholder="Lesson title" value="${escAdmin(l?.title)}">
+ <input id="aLevel" class="search" placeholder="Level" value="${escAdmin(l?.level||"9ème année")}">
+ <input id="aEmoji" class="search" placeholder="Emoji" value="${escAdmin(l?.emoji||"📚")}">
+ <textarea id="aContent" class="search" style="min-height:150px;resize:vertical" placeholder="Lesson explanation...">${escAdmin(l?.content)}</textarea>
+ <h3>Questions</h3><div id="questionEditor">${(l?.questions||[]).map(questionEditor).join("")}</div>
+ <button class="btn secondary" onclick="addQuestionEditor()">＋ Add question</button>
+ <button class="btn primary" onclick="saveLessonFromAdmin()">💾 Save lesson</button></div>`;
+}
+function addQuestionEditor(){document.getElementById("questionEditor").insertAdjacentHTML("beforeend",questionEditor())}
+function saveLessonFromAdmin(){
+ const title=document.getElementById("aTitle").value.trim(),content=document.getElementById("aContent").value.trim();
+ const questions=[...document.querySelectorAll(".qeditor")].map(x=>{const aa=[...x.querySelectorAll(".aa")].map(y=>y.value.trim());
+ return {q:x.querySelector(".aq").value.trim(),a:aa,c:Number(x.querySelector(".ac").value)};}).filter(q=>q.q&&q.a.length===3&&q.a.every(Boolean));
+ if(!title||!content||!questions.length){alert("Complete the title, explanation and at least one question.");return}
+ const obj={id:editingLessonId||Date.now(),subject:document.getElementById("aSubject").value,title,
+ level:document.getElementById("aLevel").value.trim()||"9ème année",emoji:document.getElementById("aEmoji").value.trim()||"📚",
+ content,points:30,questions};
+ const i=lessons.findIndex(x=>x.id===obj.id);if(i>=0)lessons[i]=obj;else lessons.push(obj);
+ saveLessons();renderAdminDashboard();toast("Lesson saved ✓");
+}
+function deleteLesson(id){
+ const l=lessons.find(x=>x.id===id);if(confirm("Delete '"+l.title+"'?")){
+ lessons=lessons.filter(x=>x.id!==id);state.completed=state.completed.filter(x=>x!==id);
+ saveLessons();save();showAdminLessons();toast("Lesson deleted");
+ }}
+function exportContent(){
+ const blob=new Blob([JSON.stringify(lessons,null,2)],{type:"application/json"}),a=document.createElement("a");
+ a.href=URL.createObjectURL(blob);a.download="studytn_lessons.json";a.click();URL.revokeObjectURL(a.href);
+}
+function importContent(e){
+ const file=e.target.files[0];if(!file)return;const r=new FileReader();r.onload=()=>{try{
+ const data=JSON.parse(r.result);if(!Array.isArray(data))throw 0;lessons=data;saveLessons();renderAdminDashboard();toast("Content imported ✓");
+ }catch{alert("Invalid JSON file.")}};r.readAsText(file);
+}
+
+function cycleLanguage(){
+ appLang=appLang==="en"?"ar":appLang==="ar"?"fr":"en";
+ localStorage.setItem("studytn_lang",appLang); applyLanguage(); renderSubjects(); renderToday(); searchLessons();
+}
+function cycleDesign(){
+ design=design===3?1:design+1;
+ localStorage.setItem("studytn_design",design);
+ document.body.classList.remove("design2","design3");
+ if(design===2)document.body.classList.add("design2");
+ if(design===3)document.body.classList.add("design3");
+ document.getElementById("designBtn").textContent="D"+design;
+}
+function applyLanguage(){
+ const t=uiText[appLang];
+ document.getElementById("langBtn").textContent=appLang.toUpperCase();
+ document.querySelector(".hero h1").innerHTML=t.title+"<br><span style='color:var(--primary)'>"+t.sub+"</span>";
+ document.querySelector(".hero p").textContent=t.desc;
+ document.querySelector(".hero .primary").textContent=t.start;
+ document.querySelector(".hero .secondary").textContent=t.all;
+ document.querySelectorAll(".section-title h2")[0].textContent=t.subjects;
+ document.querySelectorAll(".section-title h2")[1].textContent=t.today;
+ document.querySelectorAll(".section-title h2")[2].textContent=t.search;
+ document.getElementById("search").placeholder=t.search+"...";
+ document.querySelectorAll(".stat span")[0].textContent=t.points;
+ document.querySelectorAll(".stat span")[1].textContent=t.streak;
+ document.querySelectorAll(".stat span")[2].textContent=t.done;
+ document.querySelectorAll(".stat span")[3].textContent=t.average;
+ document.documentElement.dir=appLang==="ar"?"rtl":"ltr";
+}
+cycleDesign(); applyLanguage();
+renderSubjects();renderToday();updateStats();
+</script>
+</body>
+</html>
